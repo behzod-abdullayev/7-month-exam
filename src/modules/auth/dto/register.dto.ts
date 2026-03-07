@@ -17,7 +17,7 @@ export class RegisterDto {
   username: string;
 
   @ApiProperty({
-    example: "user@gmail.com",
+    example: "bekzod2366@gmail.com",
     description: "Foydalanuvchining asosiy email manzili",
   })
   @IsEmail({}, { message: "Email formati noto'g'ri" })
@@ -37,19 +37,3 @@ export class RegisterDto {
   })
   password: string;
 }
-
-
-// import { IsEmail, IsNumber, IsString, Length } from "class-validator";
-
-// export class CreateAuthDto {
-//   @IsString({ message: "username string bo'lishi kerak" })
-//   @Length(3, 50)
-//   username: string;
-
-//   @IsString()
-//   @IsEmail()
-//   email: string;
-
-//   @IsString()
-//   password: string;
-// }
