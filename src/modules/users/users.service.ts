@@ -1,39 +1,84 @@
-import { ConflictException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "./entities/user.entity";
 import { Repository } from "typeorm";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { User } from "./entities/user.entity";
 import * as bcrypt from "bcrypt";
+import { UpdateProfileDto } from "./dto/update-profile.dto";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<any> {
-    try {
-      const { email, password, ...rest } = createUserDto;
+  // 1. GET ME
 
-      const existingUser = await this.userRepository.findOne({ where: { email } });
+async findOne(id: string): Promise<User> {
+  console.log("Qidirilayotgan ID:", id);
 
-      if (existingUser) throw new ConflictException(" Bu email bilan foydalanuvchi allaqachon mavjud");
+  const user = await this.userRepository.findOne({
+    where: { id },
+    select: [
+      "id", 
+      "email", 
+      "username",
+      "firstName", 
+      "lastName", 
+      "avatar", 
+      "role", 
+      "createdAt"
+    ],
+  });
 
-      const newUser = this.userRepository.create({
-        ...rest,
-        email,
-      });
+  if (!user) {
+    console.log("Foydalanuvchi topilmadi!");
+    throw new NotFoundException("Foydalanuvchi topilmadi");
+  }
+  
+  return user;
+}
+  // 2. UPDATE PROFILE
+  async updateProfile(id: string, dto: UpdateProfileDto, filename?: string): Promise<User> {
+    const user = await this.findOne(id);
 
-      if (password) {
-        const salt = await bcrypt.genSalt(10);
-        newUser.password = await bcrypt.hash(password, salt);
-      }
-
-      const savedUser = await this.userRepository.save(newUser);
-
-      const { password: _, ...userWithoutPassword } = savedUser;
-
-      return userWithoutPassword as User;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
+    if (filename) {
+      user.avatar = filename;
     }
+
+    Object.assign(user, dto);
+
+    return await this.userRepository.save(user);
+  }
+
+  async changePassword(id: string, dto: ChangePasswordDto) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ["id", "password"],
+    });
+
+    if (!user) {
+      throw new NotFoundException("Foydalanuvchi topilmadi");
+    }
+
+    const isMatch = await bcrypt.compare(dto.oldPassword, user.password!);
+    if (!isMatch) {
+      throw new BadRequestException("Eski parol noto'g'ri kiritildi");
+    }
+
+    const salt = await bcrypt.genSalt();
+    user.password = await bcrypt.hash(dto.newPassword, salt);
+
+    return await this.userRepository.save(user);
+  }
+  async remove(id: string): Promise<{ success: boolean; message: string }> {
+    const result = await this.userRepository.softDelete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException("O'chirish uchun foydalanuvchi topilmadi");
+    }
+
+    return { success: true, message: "Profil muvaffaqiyatli o'chirildi" };
   }
 }

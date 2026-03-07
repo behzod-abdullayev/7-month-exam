@@ -10,7 +10,7 @@ export const swaggerConfig = new DocumentBuilder()
             scheme: "bearer",
             bearerFormat: "JWT",
             description: "jwt token kiriting",
-            "in": "header"
+            in: "header"
         },
         "JWT-auth"
     )
