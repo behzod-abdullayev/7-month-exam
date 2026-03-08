@@ -54,43 +54,39 @@ export class AuthService {
   }
 
   // 1. REGISTER
-  async register(dto: RegisterDto) {
-    const userExist = await this.userRepository.findOne({
-      where: [{ email: dto.email }, { username: dto.username || dto.email }],
-    });
+async register(dto: RegisterDto) {
+  // ✅ email va username alohida tekshiriladi
+  const emailExists = await this.userRepository.findOne({
+    where: { email: dto.email },
+  });
+  if (emailExists) throw new ConflictException("Bu email allaqachon band!");
 
-    if (userExist) {
-      throw new ConflictException("Email yoki Username allaqachon band!");
-    }
+  const usernameExists = await this.userRepository.findOne({
+    where: { username: dto.username },
+  });
+  if (usernameExists) throw new ConflictException("Bu username allaqachon band!");
 
-    const hashedPassword = await this.hashPassword(dto.password);
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+  const hashedPassword = await this.hashPassword(dto.password);
+  const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
-    try {
-      const newUser = this.userRepository.create({
-        username: dto.username,
-        email: dto.email,
-        password: hashedPassword,
-        isActive: false,
-        otpCode,
-        otpExpires,
-      });
-      await this.userRepository.save(newUser);
-      await this.mailService.sendOtpEmail(dto.email, otpCode);
+  const newUser = this.userRepository.create({
+    username: dto.username,
+    email: dto.email,
+    password: hashedPassword,
+    isActive: false,
+    otpCode,
+    otpExpires,
+  });
 
-      return {
-        success: true,
-        message: "Muvaffaqiyatli ro'yxatdan o'tildi. Tasdiqlash kodi emailga yuborildi",
-      };
-    } catch (error) {
-      this.logger.error(`Registration failed: ${error.message}`);
-      throw new InternalServerErrorException("Ro'yxatdan o'tishda kutilmagan xatolik yuz berdi");
-    }
-  }
+  await this.userRepository.save(newUser);
+  await this.mailService.sendOtpEmail(dto.email, otpCode);
 
+  return { message: "Muvaffaqiyatli ro'yxatdan o'tildi. Tasdiqlash kodi emailga yuborildi" };
+}
+ 
   // 2. LOGIN
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto) { 
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
       select: ["id", "email", "password", "isActive", "role", "firstName", "lastName"],

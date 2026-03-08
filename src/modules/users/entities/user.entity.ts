@@ -1,13 +1,22 @@
 import { Gender, Role } from "src/common/enums/role.enum";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Index, OneToMany } from "typeorm";
-import { Company } from '../../companies/entities/company.entity';
-import { Vacancy } from '../../vacancies/entities/vacancy.entity';
-import { Resume } from '../../resumes/entities/resume.entity';
-import { Application } from '../../applications/entities/application.entity';
-import { Favourite } from '../../favourites/entities/favourite.entity';
-import { Review } from '../../rewiews/entities/review.entity';
-import { Notification } from '../../notifications/entities/notification.entity';
-import { Message } from '../../chat/entities/message.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  Index,
+  OneToMany,
+  DeleteDateColumn,
+} from "typeorm";
+import { Company } from "../../companies/entities/company.entity";
+import { Vacancy } from "../../vacancies/entities/vacancy.entity";
+import { Resume } from "../../resumes/entities/resume.entity";
+import { Application } from "../../applications/entities/application.entity";
+import { Favourite } from "../../favourites/entities/favourite.entity";
+import { Review } from "../../rewiews/entities/review.entity";
+import { Notification } from "../../notifications/entities/notification.entity";
+import { Message } from "../../chat/entities/message.entity";
 
 @Entity("users")
 export class User {
@@ -66,6 +75,9 @@ export class User {
 
   @Column({ type: "varchar", nullable: true })
   refreshToken: string | null;
+
+  @DeleteDateColumn({ select: false })
+  deletedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
