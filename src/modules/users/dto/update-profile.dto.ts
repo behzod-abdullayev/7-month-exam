@@ -18,4 +18,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsPhoneNumber('UZ', { message: "Telefon raqami noto'g'ri formatda (+998XXXXXXXXX)" })
   phoneNumber?: string;
+
+  @ApiPropertyOptional({ type: 'string', format: 'binary' })
+  @IsOptional()
+  avatar?: any;
 }

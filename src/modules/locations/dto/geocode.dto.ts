@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsNotEmpty } from 'class-validator';
-import { Type } from 'class-transformer';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNumber, IsString, IsNotEmpty } from "class-validator";
+import { Type } from "class-transformer";
 
 export class ReverseGeocodeDto {
   @ApiProperty({ example: 41.2995 })
@@ -15,7 +15,7 @@ export class ReverseGeocodeDto {
 }
 
 export class GeocodeDto {
-  @ApiProperty({ example: 'Toshkent, Chilonzor tumani' })
+  @ApiProperty({ example: "Toshkent, Chilonzor tumani" })
   @IsString()
   @IsNotEmpty()
   address: string;

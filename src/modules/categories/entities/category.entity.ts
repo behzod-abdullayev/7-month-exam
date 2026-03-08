@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Vacancy } from "../../vacancies/entities/vacancy.entity";
 
 @Entity("categories")
 export class Category {
-  @PrimaryColumn("uuid")
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column({ unique: true })
@@ -17,6 +18,9 @@ export class Category {
   @Column({ default: true })
   isActive: boolean;
 
+  @OneToMany(() => Vacancy, (vacancy) => vacancy.category)
+  vacancies: Vacancy[];
+
   @CreateDateColumn()
-  createdat: Date;
+  createdAt: Date;
 }

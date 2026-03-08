@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Category } from './entities/category.entity';
-import { CreateCategoryDto } from './dto/create-category.dto';
+import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Category } from "./entities/category.entity";
+import { CreateCategoryDto } from "./dto/create-category.dto";
 
 @Injectable()
 export class CategoriesService {
@@ -13,7 +13,7 @@ export class CategoriesService {
 
   async create(dto: CreateCategoryDto): Promise<Category> {
     const existing = await this.categoryRepository.findOne({ where: { name: dto.name } });
-    if (existing) throw new ConflictException('Bu kategoriya allaqachon mavjud');
+    if (existing) throw new ConflictException("Bu kategoriya allaqachon mavjud");
 
     const category = this.categoryRepository.create(dto);
     return await this.categoryRepository.save(category);
@@ -22,13 +22,13 @@ export class CategoriesService {
   async findAll(): Promise<Category[]> {
     return await this.categoryRepository.find({
       where: { isActive: true },
-      order: { name: 'ASC' },
+      order: { name: "ASC" },
     });
   }
 
   async findOne(id: string): Promise<Category> {
     const category = await this.categoryRepository.findOne({ where: { id } });
-    if (!category) throw new NotFoundException('Kategoriya topilmadi');
+    if (!category) throw new NotFoundException("Kategoriya topilmadi");
     return category;
   }
 
@@ -59,13 +59,11 @@ export class CategoriesService {
 
     let added = 0;
     for (const cat of categories) {
-      const exists = await this.categoryRepository.findOne({ 
-        where: { name: cat.name } 
+      const exists = await this.categoryRepository.findOne({
+        where: { name: cat.name },
       });
       if (!exists) {
-        await this.categoryRepository.save(
-          this.categoryRepository.create(cat) 
-        );
+        await this.categoryRepository.save(this.categoryRepository.create(cat));
         added++;
       }
     }

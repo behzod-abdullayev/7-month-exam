@@ -52,6 +52,8 @@ async findOne(id: string): Promise<User> {
     return await this.userRepository.save(user);
   }
 
+
+  //3. CHANGE PASSWORD
   async changePassword(id: string, dto: ChangePasswordDto) {
     const user = await this.userRepository.findOne({
       where: { id },

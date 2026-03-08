@@ -1,4 +1,3 @@
-// src/utils/multer-options.ts
 import { diskStorage } from "multer";
 import { extname } from "path";
 import { BadRequestException } from "@nestjs/common";

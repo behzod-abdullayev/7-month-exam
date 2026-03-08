@@ -12,7 +12,7 @@ import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 
 @ApiTags("Authentication")
 @Controller("auth")
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth("JWT-auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   @Post("logout")
-  @ApiBearerAuth('JWT-auth')
+  @ApiBearerAuth("JWT-auth")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Tizimdan chiqish" })
@@ -69,12 +69,12 @@ export class AuthController {
   }
 
   //google
-  @Get("google")
-  @UseGuards(AuthGuard("google"))
-  authGoogle() {}
-
   @Get("google/callback")
-  @ApiOperation({ summary: "Google callback" })
+  @UseGuards(AuthGuard("google"))
+  @ApiOperation({
+    summary: "Google callback",
+    description: "Callback URL: http://localhost:4001/api/auth/google/callback",
+  })
   googleCallback(@Req() req: any) {
     return this.authService.googleLogin(req.user);
   }

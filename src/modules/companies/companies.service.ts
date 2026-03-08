@@ -1,12 +1,9 @@
-import {
-  Injectable, NotFoundException,
-  ForbiddenException, ConflictException
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Company } from './entities/company.entity';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Company } from "./entities/company.entity";
+import { CreateCompanyDto } from "./dto/create-company.dto";
+import { UpdateCompanyDto } from "./dto/update-company.dto";
 
 @Injectable()
 export class CompaniesService {
@@ -20,7 +17,7 @@ export class CompaniesService {
     const existing = await this.companyRepository.findOne({
       where: { name: dto.name },
     });
-    if (existing) throw new ConflictException('Bu nomli kompaniya allaqachon mavjud');
+    if (existing) throw new ConflictException("Bu nomli kompaniya allaqachon mavjud");
 
     const company = this.companyRepository.create({
       ...dto,
@@ -33,11 +30,11 @@ export class CompaniesService {
   async findAll(): Promise<Company[]> {
     return await this.companyRepository.find({
       where: { isActive: true },
-      relations: ['owner', 'location'],
+      relations: ["owner", "location"],
       select: {
-        owner: { id: true, firstName: true, lastName: true, email: true }
+        owner: { id: true, firstName: true, lastName: true, email: true },
       },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
     });
   }
 
@@ -45,12 +42,12 @@ export class CompaniesService {
   async findOne(id: string): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { id },
-      relations: ['owner', 'location'],
+      relations: ["owner", "location"],
       select: {
-        owner: { id: true, firstName: true, lastName: true, email: true }
+        owner: { id: true, firstName: true, lastName: true, email: true },
       },
     });
-    if (!company) throw new NotFoundException('Kompaniya topilmadi');
+    if (!company) throw new NotFoundException("Kompaniya topilmadi");
     return company;
   }
 
@@ -58,8 +55,8 @@ export class CompaniesService {
   async findMyCompanies(ownerId: string): Promise<Company[]> {
     return await this.companyRepository.find({
       where: { ownerId, isActive: true },
-      relations: ['location'],
-      order: { createdAt: 'DESC' },
+      relations: ["location"],
+      order: { createdAt: "DESC" },
     });
   }
 
@@ -68,7 +65,7 @@ export class CompaniesService {
     const company = await this.findOne(id);
 
     if (company.ownerId !== userId) {
-      throw new ForbiddenException('Siz faqat o\'z kompaniyangizni yangilay olasiz');
+      throw new ForbiddenException("Siz faqat o'z kompaniyangizni yangilay olasiz");
     }
 
     if (logo) {
@@ -84,12 +81,12 @@ export class CompaniesService {
     const company = await this.findOne(id);
 
     if (company.ownerId !== userId) {
-      throw new ForbiddenException('Siz faqat o\'z kompaniyangizni o\'chira olasiz');
+      throw new ForbiddenException("Siz faqat o'z kompaniyangizni o'chira olasiz");
     }
 
     company.isActive = false;
     await this.companyRepository.save(company);
-    return { success: true, message: 'Kompaniya muvaffaqiyatli o\'chirildi' };
+    return { success: true, message: "Kompaniya muvaffaqiyatli o'chirildi" };
   }
 
   // 7. ADMIN - VERIFY QILISH

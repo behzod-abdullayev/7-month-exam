@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable, Logger } from "@nestjs/common";
+import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
 export class MailService {
@@ -11,7 +11,7 @@ export class MailService {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Tasdiqlash kodi - HH.uz',
+        subject: "Tasdiqlash kodi - HH.uz",
         html: `
           <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
             <h2 style="color: #333;">Salom!</h2>

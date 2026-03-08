@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany } from "typeorm";
+import { Vacancy } from "../../vacancies/entities/vacancy.entity";
+import { Resume } from "../../resumes/entities/resume.entity";
 
-@Entity('skills')
+@Entity("skills")
 export class Skill {
   @PrimaryGeneratedColumn("uuid")
   id: string;
@@ -10,6 +12,12 @@ export class Skill {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @ManyToMany(() => Vacancy, (vacancy) => vacancy.skills)
+  vacancies: Vacancy[];
+
+  @ManyToMany(() => Resume, (resume) => resume.skills)
+  resumes: Resume[];
 
   @CreateDateColumn()
   createdAt: Date;

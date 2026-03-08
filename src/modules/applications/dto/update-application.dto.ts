@@ -1,4 +1,15 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateApplicationDto } from './create-application.dto';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { IsEnum, IsOptional, IsString } from "class-validator";
+import { ApplicationStatus } from "../entities/application.entity";
 
-export class UpdateApplicationDto extends PartialType(CreateApplicationDto) {}
+export class UpdateApplicationDto {
+  @ApiPropertyOptional({ enum: ApplicationStatus })
+  @IsOptional()
+  @IsEnum(ApplicationStatus)
+  status?: ApplicationStatus;
+
+  @ApiPropertyOptional({ example: "Tajriba yetarli emas..." })
+  @IsOptional()
+  @IsString()
+  rejectionReason?: string;
+}

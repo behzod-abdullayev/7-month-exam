@@ -24,7 +24,6 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-
   async updateRefreshToken(userId: string, refreshToken: string | null) {
     await this.userRepository.update(userId, {
       refreshToken: refreshToken,

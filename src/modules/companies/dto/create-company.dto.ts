@@ -1,33 +1,30 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString, IsNotEmpty, IsOptional,
-  IsUrl, IsEmail, IsEnum, IsNumber, Min, Max
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { CompanySize, CompanyType } from '../entities/company.entity';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsString, IsNotEmpty, IsOptional, IsUrl, IsEmail, IsEnum, IsNumber, Min, Max, IsUUID } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { CompanySize, CompanyType } from "../entities/company.entity";
 
 export class CreateCompanyDto {
-  @ApiProperty({ example: 'Najot Ta\'lim' })
+  @ApiProperty({ example: "Najot Ta'lim" })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ example: 'O\'zbekistondagi yetakchi IT ta\'lim markazi' })
+  @ApiPropertyOptional({ example: "O'zbekistondagi yetakchi IT ta'lim markazi" })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiPropertyOptional({ example: 'https://najotstudy.uz' })
+  @ApiPropertyOptional({ example: "https://najotstudy.uz" })
   @IsString()
   @IsOptional()
   website?: string;
 
-  @ApiPropertyOptional({ example: '+998901234567' })
+  @ApiPropertyOptional({ example: "+998901234567" })
   @IsString()
   @IsOptional()
   phone?: string;
 
-  @ApiPropertyOptional({ example: 'info@najotstudy.uz' })
+  @ApiPropertyOptional({ example: "info@najotstudy.uz" })
   @IsEmail()
   @IsOptional()
   email?: string;
@@ -50,8 +47,12 @@ export class CreateCompanyDto {
   @Type(() => Number)
   foundedYear?: number;
 
-  @ApiPropertyOptional({ example: 'uuid-of-location' })
-  @IsString()
+  @ApiPropertyOptional()
   @IsOptional()
+  @IsUUID()
   locationId?: string;
+
+  @ApiPropertyOptional({ type: "string", format: "binary" })
+  @IsOptional()
+  logo?: any;
 }

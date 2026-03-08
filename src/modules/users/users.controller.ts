@@ -1,16 +1,16 @@
-import { 
-  Controller, Get, Put, Delete, 
-  UseGuards, Req, Body, UseInterceptors, 
-  UploadedFile 
+import {
+  Controller, Get, Put, Delete,
+  UseGuards, Body, UseInterceptors, UploadedFile
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { User } from './entities/user.entity';
+import { multerOptions } from 'src/utils/multer';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
@@ -21,39 +21,31 @@ export class UsersController {
 
   @Get('me')
   @ApiOperation({ summary: 'Mening profilim' })
-  getMe(@Req() req: any) {  
-    return this.usersService.findOne(req.user.id);
+  getMe(@CurrentUser() currentUser: User) {
+    return this.usersService.findOne(currentUser.id);
   }
 
   @Put('profile')
   @ApiOperation({ summary: 'Profilni yangilash' })
-  @UseInterceptors(FileInterceptor('avatar', {
-    storage: diskStorage({
-      destination: './uploads/avatars',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + extname(file.originalname));
-      },
-    }),
-  }))
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('avatar', multerOptions))
   updateProfile(
-    @Req() req: any, 
+    @CurrentUser() currentUser: User,
     @Body() dto: UpdateProfileDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.usersService.updateProfile(req.user.id, dto, file?.filename);
+    return this.usersService.updateProfile(currentUser.id, dto, file?.filename);
   }
 
   @Put('change-password')
   @ApiOperation({ summary: 'Parolni almashtirish' })
-  changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
-    return this.usersService.changePassword(req.user.id, dto);
+  changePassword(@CurrentUser() currentUser: User, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(currentUser.id, dto);
   }
 
   @Delete('me')
-  @ApiOperation({ summary: 'Profilni o\'chirish' })
-  remove(@Req() req: any) {
-    return this.usersService.remove(req.user.id);
+  @ApiOperation({ summary: "Profilni o'chirish" })
+  remove(@CurrentUser() currentUser: User) {
+    return this.usersService.remove(currentUser.id);
   }
 }
-

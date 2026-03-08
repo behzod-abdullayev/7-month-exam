@@ -1,36 +1,46 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule } from '@nestjs/swagger';
-import { swaggerConfig } from './config/swagger.config';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ValidationPipe } from "@nestjs/common";
+import { SwaggerModule } from "@nestjs/swagger";
+import { swaggerConfig } from "./config/swagger.config";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { ResponseInterceptor } from "./common/interceptors/response.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.setGlobalPrefix("api");
 
-  app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true, 
-    transform: true,
-    forbidNonWhitelisted: true 
-  }));
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+  });
 
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/', 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  app.useStaticAssets(join(__dirname, "..", "uploads"), {
+    prefix: "/uploads/",
   });
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("docs", app, document, {
-    swaggerOptions: {
-      persistAuthorization: true, 
-    },
+    swaggerOptions: { persistAuthorization: true },
   });
 
-  const PORT = process.env.PORT || 4001; 
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ResponseInterceptor());
+
+  const PORT = process.env.PORT || 4001;
   await app.listen(PORT);
-  
-  console.log(`🚀 Server is running at: http://localhost:${PORT}/docs`);
+  console.log(`🚀 Server: http://localhost:${PORT}/docs`);
 }
 bootstrap();

@@ -30,28 +30,28 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
   ) {}
 
   async getTokens(userId: string, email: string, role: string) {
-  const payload = { sub: userId, email, role };
+    const payload = { sub: userId, email, role };
 
-  const [accessToken, refreshToken] = await Promise.all([
-    this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: "15m",
-    }),
-    this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: "7d",
-    }),
-  ]);
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_ACCESS_SECRET,
+        expiresIn: "15m",
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: "7d",
+      }),
+    ]);
 
-  return {
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  };
-}
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
 
   // 1. REGISTER
   async register(dto: RegisterDto) {
@@ -133,7 +133,7 @@ export class AuthService {
 
     if (String(user.otpCode) !== String(dto.otpCode)) throw new BadRequestException("Tasdiqlash kodi noto'g'ri");
 
-    const currentTime = new Date(); 
+    const currentTime = new Date();
     if (user.otpExpires && currentTime > user.otpExpires) {
       throw new BadRequestException("Tasdiqlash kodining muddati tugagan");
     }
@@ -141,7 +141,7 @@ export class AuthService {
     await this.userRepository.update(user.id, {
       isActive: true,
       otpCode: null,
-      otpExpires: null, 
+      otpExpires: null,
     });
 
     return { success: true, message: "Hisobingiz muvaffaqiyatli tasdiqlandi." };
@@ -205,27 +205,26 @@ export class AuthService {
     return { success: true, message: "Yangi tasdiqlash kodi emailga yuborildi" };
   }
 
-
   // 8. LOGOUT
- async logout(userId: string) {
-  const user = await this.userRepository.findOne({ where: { id: userId } });
-  
-  if (!user) {
-    throw new NotFoundException("Foydalanuvchi topilmadi");
+  async logout(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException("Foydalanuvchi topilmadi");
+    }
+
+    await this.userService.updateRefreshToken(userId, null);
+
+    return {
+      success: true,
+      message: "Tizimdan muvaffaqiyatli chiqdingiz. Seans yakunlandi.",
+    };
   }
 
-  await this.userService.updateRefreshToken(userId, null);
-
-  return {
-    success: true,
-    message: "Tizimdan muvaffaqiyatli chiqdingiz. Seans yakunlandi.",
-  };
-} 
-
-  // 7. GOOGLE 
+  // 7. GOOGLE
   async googleLogin(userData: any) {
     const user = await this.userService.findOrCreate(userData);
-    
+
     const tokens = await this.getTokens(user.id, user.email, user.role);
 
     await this.userService.updateRefreshToken(user.id, tokens.refresh_token);
@@ -237,7 +236,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
-      }
+      },
     };
   }
 
@@ -246,9 +245,4 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
-
-
-
-
-
 }
